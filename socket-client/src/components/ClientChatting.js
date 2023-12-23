@@ -6,7 +6,7 @@ import io from 'socket.io-client';
 
 const socket = io.connect('http://localhost:8000', { autoConnect: false });
 
-export default function Chatting3() {
+export default function ClientChatting() {
   const [msgInput, setMsgInput] = useState('');
   const [userIdInput, setUserIdInput] = useState('');
   const [chatList, setChatList] = useState([]);
@@ -116,11 +116,7 @@ export default function Chatting3() {
 
   return (
     <>
-      <h3>실습 4, 5번</h3>
-      <ul>
-        <li>채팅창 메시지 전송</li>
-        <li>DM 기능 구현</li>
-      </ul>
+      <h3>Chat</h3>
 
       {userId ? (
         <>
