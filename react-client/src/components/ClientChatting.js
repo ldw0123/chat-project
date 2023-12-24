@@ -1,4 +1,4 @@
-import '../styles/chat.css';
+import './styles/chat.css';
 import { useCallback, useMemo, useEffect, useState } from 'react';
 import Chat from './Chat';
 import Notice from './Notice';
@@ -6,10 +6,9 @@ import io from 'socket.io-client';
 
 const socket = io.connect('http://localhost:8000', { autoConnect: false });
 
-export default function ClientChatting() {
+export default function Chatting3() {
   const [msgInput, setMsgInput] = useState('');
   const [userIdInput, setUserIdInput] = useState('');
-  const [roomIdInput, setRoomIdInput] = useState(''); // room
   const [chatList, setChatList] = useState([]);
   const [userId, setUserId] = useState(null);
   const [userList, setUserList] = useState({});
@@ -110,19 +109,18 @@ export default function ClientChatting() {
 
   const entryChat = () => {
     initSocketConnect();
-    socket.emit('entry', { userId: userIdInput, roomId: roomIdInput });
+    socket.emit('entry', { userId: userIdInput });
     // [실습 3-2] 바로 userId에 값을 할당하지 않고
     // setUserId(userIdInput); // success
   };
 
-  const disconnect = () => {
-    socket.emit('leave', { userId: userId, roomId: roomIdInput });
-    setUserId(null);
-  };
-
   return (
     <>
-      <h3>Chat</h3>
+      <h3>실습 4, 5번</h3>
+      <ul>
+        <li>채팅창 메시지 전송</li>
+        <li>DM 기능 구현</li>
+      </ul>
 
       {userId ? (
         <>
@@ -133,7 +131,6 @@ export default function ClientChatting() {
               else return <Chat key={i} chat={chat} />;
             })}
           </div>
-
           <div className="input-container">
             {/* [실습 5] DM 기능 구현 */}
             <select value={dmTo} onChange={(e) => setDmTo(e.target.value)}>
@@ -154,20 +151,11 @@ export default function ClientChatting() {
           <div className="input-container">
             <input
               type="text"
-              placeholder="사용자 이름을 입력하세요"
               value={userIdInput}
               onChange={(e) => setUserIdInput(e.target.value)}
             />
-            {/* <button onClick={entryChat}>입장</button> */}
+            <button onClick={entryChat}>입장</button>
           </div>
-          <br />
-          <input
-            type="text"
-            placeholder="채팅방을 입력하세요"
-            value={roomIdInput}
-            onChange={(e) => setRoomIdInput(e.target.value)}
-          />{' '}
-          <button onClick={entryChat}>입장</button>
         </>
       )}
     </>

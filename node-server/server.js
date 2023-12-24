@@ -1,9 +1,12 @@
 const http = require('http'); // 소켓은 http 파일을 열어야만 사용할 수 있다
 const express = require('express');
 const app = express();
-const server = http.createServer(app); // 소켓은 http 모듈로 생성된 서버에서만 동작한다
+// 소켓은 http 모듈로 생성된 서버에서만 동작한다
+const server = http.createServer(app);
 const PORT = 8000;
-const cors = require('cors'); // CORS issue
+
+// CORS issue
+const cors = require('cors');
 app.use(cors());
 
 const io = require('socket.io')(server, {
@@ -15,7 +18,6 @@ const io = require('socket.io')(server, {
 // 딕셔너리 타입
 // { 'socket.id': 'userIdA', 'socket.idB': 'userIdC', 'socket.id': 'userId' }
 const userIdArr = {};
-const userRoomIdArr = {};
 
 // 유저를 알려줌
 const updateUserList = () => {
@@ -43,9 +45,6 @@ io.on('connection', (socket) => {
         msg: '중복된 아이디가 존재하여 입장이 불가합니다',
       });
     } else {
-      userRoomIdArr[res.userId] = res.roomId; // room객체로 특정 사용자가 어떤 방에 속해 있는지 확인
-      socket.join(res.roomId); // socket.join() : 현재 socket이 특정 방(res.roomId)에 참여(join)하도록 한다
-
       // 중복되지 않을 경우 정상적으로 notice (io객체: 모든 클라이언트에게 이벤트 발송)
       io.emit('notice', { msg: `${res.userId}님이 입장하셨습니다.` });
       // 선수 입장
@@ -59,13 +58,8 @@ io.on('connection', (socket) => {
 
   // [실습 3-3] 퇴장시키기
   socket.on('disconnect', () => {
-    const roomId = userRoomIdArr[userIdArr[socket.id]]; // room
-    // io.to() : 특정 room에게 emit을 한다
-    io.to(roomId).io.emit('notice', {
-      msg: `${userIdArr[socket.id]}님이 퇴장하셨습니다.`,
-    });
+    io.emit('notice', { msg: `${userIdArr[socket.id]}님이 퇴장하셨습니다.` });
     delete userIdArr[socket.id]; // 삭제
-    delete userRoomIdArr[userIdArr[socket.id]]; // room 삭제
     console.log('userIdArr: ', userIdArr);
     updateUserList();
   });
@@ -75,7 +69,7 @@ io.on('connection', (socket) => {
     if (res.dm === 'all')
       // 유저의 id, 메시지를 전체에게 송신
       io.emit('chat', { userId: res.userId, msg: res.msg });
-    else if (res.dm !== 'all') {
+    else {
       // 원하는 사람에게만 메시지(socket)을 보낸다
       // io.to(socket.id).emit()
       io.to(res.dm).emit('chat', {
